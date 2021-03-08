@@ -360,18 +360,16 @@ class CacheDirectoryMixin(object):
         self.cached_file_list = {}
 
     def _load_files_single_dir(self, the_dir):
+        result = self.cached_file_list.get(the_dir)
+
+        if result:
+            _last_stat, files = result
+            return files
+
         try:
             stat = os.stat(the_dir)
         except Exception as e:
             stat = 0
-
-        result = self.cached_file_list.get(the_dir)
-
-        if result:
-            last_stat, files = result
-            if stat and last_stat == stat:
-                print('Dir {0} unchanged'.format(the_dir))
-                return files
 
         files = super(CacheDirectoryMixin, self)._load_files_single_dir(the_dir)
         files = list(files)
