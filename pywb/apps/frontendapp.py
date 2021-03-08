@@ -119,7 +119,7 @@ class FrontEndApp(object):
         self.url_map = Map()
         self.url_map.add(Rule('/static/_/<coll>/<path:filepath>', endpoint=self.serve_static))
         self.url_map.add(Rule('/static/<path:filepath>', endpoint=self.serve_static))
-        self.url_map.add(Rule('/collinfo.json', endpoint=self.serve_listing))
+        self.url_map.add(Rule('/collinfo.json', endpoint=self.serve_listing_from_template))
 
         if self.is_valid_coll('$root'):
             coll_prefix = ''
@@ -515,6 +515,29 @@ class FrontEndApp(object):
 
         return WbResponse.json_response(result)
 
+    def serve_listing_from_template(self, environ):
+        """Serves the response for WARCServer collection listing following the
+           configured template (collinfo.json).
+
+        :param dict environ: The WSGI environment dictionary for the request
+        :return: WbResponse containing the WARCServer collections
+        :rtype: WbResponse
+        """
+
+        list_view = BaseInsertView(self.rewriterapp.jinja_env, 'collinfo.json')
+        fixed_routes = self.warcserver.list_fixed_routes()
+        dynamic_routes = self.warcserver.list_dynamic_routes()
+
+        routes = fixed_routes + dynamic_routes
+
+        all_metadata = self.metadata_cache.get_all(dynamic_routes)
+
+        content = list_view.render_to_string(environ,
+                                             routes=routes,
+                                             all_metadata=all_metadata)
+
+        return WbResponse.text_response(content, content_type='application/json; charset=utf-8')
+
     def is_valid_coll(self, coll):
         """Determines if the collection name for a request is valid (exists)
 
@@ -747,7 +770,7 @@ class FrontEndApp(object):
 
 # ============================================================================
 class MetadataCache(object):
-    """This class holds the collection medata template string and
+    """This class holds the collection metadata template string and
     caches the metadata for a collection once it is rendered once.
     Cached metadata is updated if its corresponding file has been updated since last cache time (file mtime based)"""
 
