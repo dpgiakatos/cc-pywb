@@ -50,6 +50,7 @@ class IndexHandler(object):
         self.opts = opts or {}
         self.fuzzy = FuzzyMatcher(kwargs.get('rules_file'))
         self.access_checker = kwargs.get('access_checker')
+        self.output_field_mapper = kwargs.get('output_field_mapper')
 
     def get_supported_modes(self):
         return dict(modes=['list_sources', 'index'])
@@ -70,6 +71,9 @@ class IndexHandler(object):
 
         if self.access_checker:
             cdx_iter = self.access_checker(cdx_iter, acl_user)
+
+        if self.output_field_mapper:
+            cdx_iter = self.output_field_mapper(cdx_iter)
 
         return cdx_iter
 

@@ -19,6 +19,8 @@ from pywb.warcserver.index.zipnum import ZipNumIndexSource
 
 from pywb.warcserver.access_checker import AccessChecker, CacheDirectoryAccessSource
 
+from pywb.warcserver.outputfieldmapper import OutputFieldMapper
+
 from pywb import DEFAULT_CONFIG
 
 from six import iteritems, iterkeys, itervalues
@@ -154,9 +156,15 @@ class WarcServer(BaseWarcServer):
         else:
             source = dir_source
 
+        output_field_map = self.config.get("map_output_fields", None)
+        output_field_mapper = None
+        if output_field_map:
+            output_field_mapper = OutputFieldMapper(field_map=output_field_map)
+
         return DefaultResourceHandler(source, self.archive_paths,
                                       rules_file=self.rules_file,
-                                      access_checker=access_checker)
+                                      access_checker=access_checker,
+                                      output_field_mapper=output_field_mapper)
 
     def list_fixed_routes(self):
         return list(self.fixed_routes.keys())
@@ -250,9 +258,15 @@ class WarcServer(BaseWarcServer):
         if acl_paths or embargo:
             access_checker = AccessChecker(acl_paths, default_access, embargo)
 
+        output_field_map = self.config.get("map_output_fields", None)
+        output_field_mapper = None
+        if output_field_map:
+            output_field_mapper = OutputFieldMapper(field_map=output_field_map)
+
         return DefaultResourceHandler(agg, archive_paths,
                                       rules_file=self.rules_file,
-                                      access_checker=access_checker)
+                                      access_checker=access_checker,
+                                      output_field_mapper=output_field_mapper)
 
     def init_sequence(self, coll_name, seq_config):
         if not isinstance(seq_config, list):
