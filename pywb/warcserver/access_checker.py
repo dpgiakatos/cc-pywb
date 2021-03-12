@@ -5,6 +5,7 @@ from pywb.warcserver.index.cdxobject import CDXObject
 
 from pywb.utils.binsearch import search
 from pywb.utils.merge import merge
+from pywb.utils.wbexception import NotFoundException
 
 from warcio.timeutils import timestamp_to_datetime
 from datetime import datetime, timedelta
@@ -230,9 +231,14 @@ class AccessChecker(object):
         if collection:
             params['param.coll'] = collection
 
-        acl_iter, errs = self.aggregator(params)
-        if errs:
-            print(errs)
+        try:
+            # ignore errors, it's ok not have ACL rules for a collection
+            acl_iter, errs = self.aggregator(params)
+            if errs:
+                print(errs)
+                return self.default_rule
+        except NotFoundException:
+            return self.default_rule
 
         key = params['key']
         key_exact = key + self.EXACT_SUFFIX_B

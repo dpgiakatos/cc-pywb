@@ -85,6 +85,12 @@ class BaseAggregator(object):
     def load_index(self, params):
         res_list = self._load_all(params)
 
+        if not res_list:
+            msg = "No index found"
+            if 'param.coll' in params and params['param.coll']:
+                msg += " for collection '{}'".format(params['param.coll'])
+            raise NotFoundException(msg)
+
         iter_list = [res[0] for res in res_list]
         err_list = chain(*[res[1] for res in res_list])
 
