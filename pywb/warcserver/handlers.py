@@ -114,7 +114,10 @@ class IndexHandler(object):
             # raise exceptions early so that they can be handled properly
             first_line = next(res)
         except StopIteration:
-            pass
+            url = params.get('url')
+            msg = 'No Captures found for: {}'.format(url)
+            errs = dict(last_exc=NotFoundException(msg, url))
+            return None, None, errs
         except CDXException as e:
             errs = dict(last_exc=e)
             return None, None, errs
