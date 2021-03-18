@@ -109,7 +109,7 @@ org,iana)/time-zones 20140126200737    zipnum    9631    166    38
 # read cdx to find no captures
 >>> zip_ops_test(url='http://aaa.zz/', matchType='domain')
 
-# Invalid .idx filesor or missing loc
+# Invalid .idx files or missing loc
 
 >>> zip_test_err(url='http://example.com/', matchType='exact')  # doctest: +IGNORE_EXCEPTION_DETAIL
 Traceback (most recent call last):
