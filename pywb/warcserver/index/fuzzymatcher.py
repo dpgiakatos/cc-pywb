@@ -167,7 +167,7 @@ class FuzzyMatcher(object):
             return
 
         # if fuzzy matching disabled
-        if not to_bool(params.get('allowFuzzy', True)):
+        if not to_bool(params.get('allowFuzzy', False)):
             return
 
         url = params['url']
